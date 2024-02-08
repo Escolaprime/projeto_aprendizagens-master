@@ -1,0 +1,6 @@
+{
+  "appId": "com.escolaprime.app",
+  "appName": "Escolaprime+",
+  "webDir": "dist",
+  "bundledWebRuntime": false
+}

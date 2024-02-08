@@ -1,0 +1,7 @@
+{
+  "name": "projeto_aprendizagens",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "vue"
+}
