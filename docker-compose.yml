@@ -1,0 +1,12 @@
+version: '3'
+services:
+  projeto_ead_admin:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: projeto_ead_admin
+    ports:
+      - "3002:80"
+    volumes:
+      - .:/app
+    restart: always
