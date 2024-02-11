@@ -3,18 +3,20 @@ FROM node:16.16 as build-stage
 
 WORKDIR /app
 
-COPY package*.json /app/
+COPY package*.json ./
 
 RUN npm install -g ionic
 
-RUN npm install
+RUN npm install --legacy-peer-deps
 
-COPY ./ /app/
+COPY . .
 
-RUN npm run-script build:prod
+RUN npm run build
 
-FROM nginx:alpine
+FROM nginx:latest
 
-RUN rm -rf /usr/share/nginx/html/*
+COPY --from=build-stage /app/dist /usr/share/nginx/html
 
-COPY --from=build-stage /app/www/ /usr/share/nginx/html/
+EXPOSE 3002
+
+CMD ["nginx", "-g", "daemon off;"]%
