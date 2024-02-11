@@ -1,10 +1,10 @@
 version: '3'
 services:
-  projeto_ead_admin:
+  projeto_aprendizagens:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: projeto_ead_admin
+    container_name: projeto_aprendizagens
     ports:
       - "3002:80"
     volumes:
