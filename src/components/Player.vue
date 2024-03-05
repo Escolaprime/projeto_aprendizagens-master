@@ -31,22 +31,6 @@ export default defineComponent({
         debug: true,
         clickToPlay: true,
         hideControls: false,
-        listeners: {
-          seek: (ev) => {
-            const getTargetTime = (plyr, input) => {
-              return typeof input === "object" &&
-                (input.type === "input" || input.type === "change")
-                ? (input.target.value / input.target.max) * plyr.duration
-                : Number(input);
-            };
-            const seeked = getTargetTime(plyr, ev);
-            if (parseFloat(seeked) > lastCurrentTime.value) {
-              ev.preventDefault();
-              plyr.currentTime = lastCurrentTime.value;
-              return false;
-            }
-          },
-        },
         controls: ["play", "play-large", "progress", "duration", "fullscreen"],
       });
       plyr.on(
@@ -58,7 +42,6 @@ export default defineComponent({
           });
         }, 253)
       );
-      console.log({sexo: props.options.sources})
       plyr.source = {
         title: "Video teste",
         type: "video",
