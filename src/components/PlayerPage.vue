@@ -17,32 +17,32 @@
 </template>
 
 <script>
+import useDialogs from "@/composables/useDialogs";
+import axios from "@/configs/axios.config";
+import { db as dexie } from "@/plugins/dexie";
+import { Capacitor } from "@capacitor/core";
+import {
+  IonButton,
+  IonButtons,
+  IonContent,
+  IonHeader,
+  IonIcon,
+  IonPage,
+  IonProgressBar,
+  IonTitle,
+  IonToolbar,
+} from "@ionic/vue";
+import { arrowBack } from "ionicons/icons";
 import {
   computed,
   defineComponent,
   onMounted,
-  ref,
   provide,
   reactive,
+  ref,
 } from "vue";
-import {
-  IonPage,
-  IonHeader,
-  IonToolbar,
-  IonButtons,
-  IonButton,
-  IonTitle,
-  IonIcon,
-  IonContent,
-  IonProgressBar,
-} from "@ionic/vue";
-import { arrowBack } from "ionicons/icons";
-import useDialogs from "@/composables/useDialogs";
-import Player from "./Player.vue";
-import { Capacitor } from "@capacitor/core";
 import { useStore } from "vuex";
-import { db as dexie } from "@/plugins/dexie";
-import axios from "@/configs/axios.config";
+import Player from "./Player.vue";
 export default defineComponent({
   components: {
     IonPage,
@@ -107,11 +107,17 @@ export default defineComponent({
     user() {
       return this.$store.state.autenticacao.user;
     },
-    sources() {
+    async sources() {
       const uri = Capacitor.convertFileSrc(this.$props.video.uri);
-      const url = `${this.$store.state.helper.baseURL}/videos/streamingVideo/?hash=${this.$props.video.hash_video_id}`;
+      const url = await axios.get(
+        `${this.$store.state.helper.baseURL}/videos/streamingVideo`,
+        {
+          params: { hash: `${this.$props.video.hash_video_id}` },
+          headers: { Range: "bytes=0-" },
+        }
+      );
       return this.networkStatus.connected
-        ? [{ src: url, type: "video/mp4" }]
+        ? [{ src: url.data.link, type: "video/mp4" }]
         : [{ src: uri, type: "video/mp4" }];
     },
   },
@@ -127,17 +133,20 @@ export default defineComponent({
     const assistido = computed(() => state.stats_video?.completed);
     const networkStatus = store.state.helper.networkStatus;
     const uri = computed(() => Capacitor.convertFileSrc(props.video?.uri));
-    const src = computed(
-      () =>
-        `${baseURL}/videos/streamingVideo/?hash=${props.video.hash_video_id}`
-    );
+    const src = computed(async () => {
+      const url = await axios.get(`${baseURL}/videos/streamingVideo`, {
+        params: { hash: `${this.$props.video.hash_video_id}` },
+        headers: { Range: "bytes=0-" },
+      });
+      return url.data.link;
+    });
     const defaultOptions = reactive({
       autoplay: false,
       controls: true,
       fluid: true,
       sources: [
         {
-          src: networkStatus.connected ? src.value : uri.value,
+          src: networkStatus.connected ? src : uri.value,
           type: "video/mp4",
         },
       ],

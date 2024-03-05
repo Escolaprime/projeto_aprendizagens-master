@@ -3,20 +3,15 @@
 </template>
 
 <script>
+import { debounce } from "@/utils";
 import {
   defineComponent,
-  onMounted,
-  onUnmounted,
-  onBeforeUnmount,
-  reactive,
-  ref,
-  toRef,
   inject,
-  watch,
-  watchEffect,
+  onBeforeUnmount,
+  onMounted,
+  ref,
+  watchEffect
 } from "vue";
-import { db as dexie } from "@/plugins/dexie";
-import { debounce } from "@/utils";
 // import videojs from "video.js";
 // import "video.js/dist/video-js.css";
 import Plyr from "plyr";
@@ -31,7 +26,7 @@ export default defineComponent({
     let plyr;
     let timer;
     const lastCurrentTime = inject("lastCurrentTime");
-    onMounted(() => {
+    onMounted(async () => {
       plyr = new Plyr(player.value, {
         debug: true,
         clickToPlay: true,
@@ -63,10 +58,11 @@ export default defineComponent({
           });
         }, 253)
       );
+      console.log({sexo: props.options.sources})
       plyr.source = {
         title: "Video teste",
         type: "video",
-        sources: props.options.sources,
+        sources: await props.options.sources,
       };
     });
     onBeforeUnmount(() => {
