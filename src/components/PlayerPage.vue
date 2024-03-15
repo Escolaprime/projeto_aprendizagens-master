@@ -109,13 +109,21 @@ export default defineComponent({
     },
     async sources() {
       const uri = Capacitor.convertFileSrc(this.$props.video.uri);
-      const url = await axios.get(
-        `${this.$store.state.helper.baseURL}/videos/streamingVideo`,
+      const base = this.$store.state.helper.baseURL
+      const hash = this.$props.video.hash_video_id
+      async function fetchData() {
+       return await axios.get(
+        `${base}/videos/streamingVideo`,
         {
-          params: { hash: `${this.$props.video.hash_video_id}` },
+          params: { hash: `${hash}` },
           headers: { Range: "bytes=0-" },
         }
-      );
+      )
+      }
+      let url = ''
+      if (this.networkStatus.connected) {
+         url = await fetchData();
+      }
       return this.networkStatus.connected
         ? [{ src: url.data.link, type: "video/mp4" }]
         : [{ src: uri, type: "video/mp4" }];
@@ -133,20 +141,18 @@ export default defineComponent({
     const assistido = computed(() => state.stats_video?.completed);
     const networkStatus = store.state.helper.networkStatus;
     const uri = computed(() => Capacitor.convertFileSrc(props.video?.uri));
-    const src = computed(async () => {
-      const url = await axios.get(`${baseURL}/videos/streamingVideo`, {
-        params: { hash: `${this.$props.video.hash_video_id}` },
-        headers: { Range: "bytes=0-" },
-      });
-      return url.data.link;
-    });
+    const src = computed(
+      () =>
+        `${baseURL}/videos/streamingVideo/?hash=${props.video.hash_video_id}`
+    );
+
     const defaultOptions = reactive({
       autoplay: false,
       controls: true,
       fluid: true,
       sources: [
         {
-          src: networkStatus.connected ? src : uri.value,
+          src: networkStatus.connected ? src.value : uri,
           type: "video/mp4",
         },
       ],
@@ -210,7 +216,6 @@ export default defineComponent({
         video_id: props.video.id,
         aluno_id: user.id,
       });
-      console.log(exists);
       state.stats_video = exists;
       lastCurrentTime.value = exists?.currentTime ?? 0;
       if (!exists) {
